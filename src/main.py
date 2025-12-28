@@ -23,7 +23,7 @@ def get_target_dates() -> list[str]:
     """Get target dates based on current weekday.
 
     - Monday: Previous Friday, Saturday, Sunday
-    - Tuesday-Friday: Yesterday only
+    - Tuesday-Sunday: Yesterday only
 
     Returns:
         List of date strings in YYYY-MM-DD format.
@@ -39,7 +39,7 @@ def get_target_dates() -> list[str]:
             today - timedelta(days=1),  # Sunday
         ]
     else:
-        # Tuesday-Friday: just yesterday
+        # Tuesday-Sunday: just yesterday
         dates = [today - timedelta(days=1)]
 
     return [d.strftime("%Y-%m-%d") for d in dates]
@@ -56,9 +56,10 @@ def find_config_path() -> Path:
     """
     # Check common locations
     candidates = [
+        # Path relative to the script file (most reliable when running from source)
+        Path(__file__).parent.parent / "config" / "agencies.yaml",
+        # Path relative to current working directory
         Path("config/agencies.yaml"),
-        Path(__file__).parent.parent.parent.parent / "config" / "agencies.yaml",
-        Path.cwd() / "config" / "agencies.yaml",
     ]
 
     for path in candidates:
