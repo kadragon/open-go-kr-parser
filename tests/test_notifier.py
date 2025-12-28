@@ -59,7 +59,9 @@ class TestTelegramNotifier:
         # Verify message contains document info
         request_body = responses.calls[0].request.body
         assert request_body is not None
-        body_str = request_body.decode() if isinstance(request_body, bytes) else request_body
+        body_str = (
+            request_body.decode() if isinstance(request_body, bytes) else request_body
+        )
         assert "교육부" in body_str or "%EA%B5%90%EC%9C%A1%EB%B6%80" in body_str
 
     # TEST-telegram-notifier-002: Handle empty document list with appropriate message
