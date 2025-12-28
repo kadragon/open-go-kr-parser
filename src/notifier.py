@@ -3,7 +3,7 @@
 
 import requests
 
-from open_go_kr_parser.client import Document
+from client import Document
 
 
 class TelegramError(Exception):
@@ -64,7 +64,10 @@ class TelegramNotifier:
         if not documents:
             escaped_agency = self._escape_markdown(agency_name)
             escaped_date = self._escape_markdown(date)
-            return f"📋 *{escaped_agency} 원문정보 \\({escaped_date}\\)*\n\n공개된 문서가 없습니다\\."
+            return (
+                f"📋 *{escaped_agency} 원문정보 \\({escaped_date}\\)*\n\n"
+                "공개된 문서가 없습니다\\."
+            )
 
         escaped_agency = self._escape_markdown(agency_name)
         escaped_date = self._escape_markdown(date)

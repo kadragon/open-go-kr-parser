@@ -5,7 +5,7 @@ import pytest
 import responses
 from requests.exceptions import ConnectionError
 
-from open_go_kr_parser.client import Document, OpenGoKrClient, OpenGoKrError
+from client import Document, OpenGoKrClient, OpenGoKrError
 
 
 class TestOpenGoKrClient:
@@ -90,7 +90,8 @@ class TestOpenGoKrClient:
         with pytest.raises(OpenGoKrError) as exc_info:
             client.fetch_documents("1342000", "2025-12-27")
 
-        assert "network" in str(exc_info.value).lower() or "connection" in str(exc_info.value).lower()
+        error_msg = str(exc_info.value).lower()
+        assert "network" in error_msg or "connection" in error_msg
 
     # TEST-api-client-004: Parse document fields correctly
     @responses.activate
@@ -145,23 +146,37 @@ class TestOpenGoKrClient:
     def test_fetch_documents_pagination(self, client: OpenGoKrClient) -> None:
         """Fetch all pages when documents exceed page size."""
         # First page
+        first_page_docs = [
+            {
+                "othbcSeNm": "원문공개",
+                "insttNm": "교육부",
+                "orginlNm": f"문서 {i}",
+                "orginlUrl": f"https://example.com/{i}",
+                "othbcDt": "2025-12-27",
+            }
+            for i in range(10)
+        ]
         responses.add(
             responses.POST,
             self.API_URL,
-            json={
-                "list": [{"othbcSeNm": "원문공개", "insttNm": "교육부", "orginlNm": f"문서 {i}", "orginlUrl": f"https://example.com/{i}", "othbcDt": "2025-12-27"} for i in range(10)],
-                "totalCnt": 15,
-            },
+            json={"list": first_page_docs, "totalCnt": 15},
             status=200,
         )
         # Second page
+        second_page_docs = [
+            {
+                "othbcSeNm": "원문공개",
+                "insttNm": "교육부",
+                "orginlNm": f"문서 {i}",
+                "orginlUrl": f"https://example.com/{i}",
+                "othbcDt": "2025-12-27",
+            }
+            for i in range(10, 15)
+        ]
         responses.add(
             responses.POST,
             self.API_URL,
-            json={
-                "list": [{"othbcSeNm": "원문공개", "insttNm": "교육부", "orginlNm": f"문서 {i}", "orginlUrl": f"https://example.com/{i}", "othbcDt": "2025-12-27"} for i in range(10, 15)],
-                "totalCnt": 15,
-            },
+            json={"list": second_page_docs, "totalCnt": 15},
             status=200,
         )
 
