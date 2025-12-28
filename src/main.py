@@ -19,10 +19,30 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_yesterday() -> str:
-    """Get yesterday's date in YYYY-MM-DD format."""
-    yesterday = datetime.now() - timedelta(days=1)
-    return yesterday.strftime("%Y-%m-%d")
+def get_target_dates() -> list[str]:
+    """Get target dates based on current weekday.
+
+    - Monday: Previous Friday, Saturday, Sunday
+    - Tuesday-Friday: Yesterday only
+
+    Returns:
+        List of date strings in YYYY-MM-DD format.
+    """
+    today = datetime.now()
+    weekday = today.weekday()  # 0=Monday, 4=Friday
+
+    if weekday == 0:  # Monday
+        # Get previous Friday (3 days ago), Saturday (2 days ago), Sunday (1 day ago)
+        dates = [
+            today - timedelta(days=3),  # Friday
+            today - timedelta(days=2),  # Saturday
+            today - timedelta(days=1),  # Sunday
+        ]
+    else:
+        # Tuesday-Friday: just yesterday
+        dates = [today - timedelta(days=1)]
+
+    return [d.strftime("%Y-%m-%d") for d in dates]
 
 
 def find_config_path() -> Path:
@@ -58,10 +78,10 @@ def main() -> int:
         description="Fetch and notify about government document disclosures"
     )
     parser.add_argument(
-        "--date",
+        "--dates",
         type=str,
         default=None,
-        help="Target date (YYYY-MM-DD), defaults to yesterday",
+        help="Target dates (YYYY-MM-DD, comma-separated), defaults to auto-calculated",
     )
     parser.add_argument(
         "--config",
@@ -71,9 +91,12 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    # Get target date
-    target_date = args.date or get_yesterday()
-    logger.info(f"Fetching documents for date: {target_date}")
+    # Get target dates
+    if args.dates:
+        target_dates = [d.strip() for d in args.dates.split(",")]
+    else:
+        target_dates = get_target_dates()
+    logger.info(f"Fetching documents for dates: {target_dates}")
 
     # Load configuration
     try:
@@ -102,27 +125,30 @@ def main() -> int:
     api_client = OpenGoKrClient()
     notifier = TelegramNotifier(bot_token, chat_id)
 
-    # Process each agency
+    # Process each agency for each target date
     has_errors = False
-    for agency in agencies:
-        logger.info(f"Processing agency: {agency.name} ({agency.code})")
+    for target_date in target_dates:
+        logger.info(f"Processing date: {target_date}")
 
-        try:
-            documents = api_client.fetch_documents(agency.code, target_date)
-            logger.info(f"Found {len(documents)} documents for {agency.name}")
+        for agency in agencies:
+            logger.info(f"Processing agency: {agency.name} ({agency.code})")
 
-            notifier.send_documents(agency.name, target_date, documents)
-            logger.info(f"Notification sent for {agency.name}")
+            try:
+                documents = api_client.fetch_documents(agency.code, target_date)
+                logger.info(f"Found {len(documents)} documents for {agency.name}")
 
-        except OpenGoKrError as e:
-            logger.error(f"API error for {agency.name}: {e}")
-            has_errors = True
-            continue
+                notifier.send_documents(agency.name, target_date, documents)
+                logger.info(f"Notification sent for {agency.name}")
 
-        except TelegramError as e:
-            logger.error(f"Telegram error for {agency.name}: {e}")
-            has_errors = True
-            continue
+            except OpenGoKrError as e:
+                logger.error(f"API error for {agency.name}: {e}")
+                has_errors = True
+                continue
+
+            except TelegramError as e:
+                logger.error(f"Telegram error for {agency.name}: {e}")
+                has_errors = True
+                continue
 
     return 1 if has_errors else 0
 

@@ -9,11 +9,11 @@
 agencies:
   - code: "1342000"
     name: "교육부"
-
+  - code: "1741000"
+    name: "행정안전부"
+  - code: "1721000"
+    name: "과학기술정보통신부"
+  
   # Example additional agencies (uncomment to enable):
-  # - code: "1741000"
-  #   name: "행정안전부"
-  # - code: "1660000"
-  #   name: "과학기술정보통신부"
   # - code: "1350000"
   #   name: "외교부"

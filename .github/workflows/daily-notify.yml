@@ -3,13 +3,13 @@ name: Daily Document Notification
 
 on:
   schedule:
-    # Run at 00:00 UTC (09:00 KST) every day
-    - cron: '0 0 * * *'
+    # Run at 00:00 UTC (09:00 KST) Monday to Friday
+    - cron: '0 0 * * 1-5'
 
   workflow_dispatch:
     inputs:
-      target_date:
-        description: 'Target date (YYYY-MM-DD), defaults to yesterday'
+      target_dates:
+        description: 'Target dates (YYYY-MM-DD, comma-separated), defaults to auto-calculated'
         required: false
         type: string
 
@@ -37,8 +37,8 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          if [ -n "${{ inputs.target_date }}" ]; then
-            open-go-kr --date "${{ inputs.target_date }}"
+          if [ -n "${{ inputs.target_dates }}" ]; then
+            open-go-kr --dates "${{ inputs.target_dates }}"
           else
             open-go-kr
           fi
