@@ -8,9 +8,9 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from open_go_kr_parser.client import OpenGoKrClient, OpenGoKrError
-from open_go_kr_parser.config import load_agencies
-from open_go_kr_parser.notifier import TelegramError, TelegramNotifier
+from src.client import OpenGoKrClient, OpenGoKrError
+from src.config import load_agencies
+from src.notifier import TelegramError, TelegramNotifier
 
 logging.basicConfig(
     level=logging.INFO,
@@ -45,9 +45,7 @@ def find_config_path() -> Path:
         if path.exists():
             return path
 
-    raise FileNotFoundError(
-        "agencies.yaml not found. Expected in config/agencies.yaml"
-    )
+    raise FileNotFoundError("agencies.yaml not found. Expected in config/agencies.yaml")
 
 
 def main() -> int:
@@ -95,7 +93,9 @@ def main() -> int:
     chat_id = os.environ.get("TELEGRAM_CHAT_ID")
 
     if not bot_token or not chat_id:
-        logger.error("Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID environment variables")
+        logger.error(
+            "Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID environment variables"
+        )
         return 1
 
     # Initialize clients

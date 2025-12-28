@@ -6,7 +6,7 @@ from tempfile import NamedTemporaryFile
 
 import pytest
 
-from open_go_kr_parser.config import Agency, load_agencies
+from src.config import Agency, load_agencies
 
 
 class TestLoadAgencies:

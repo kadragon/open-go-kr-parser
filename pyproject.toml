@@ -31,26 +31,33 @@ dev = [
     "pytest>=7.4.0",
     "pytest-cov>=4.1.0",
     "responses>=0.24.0",
-    "black>=24.0.0",
-    "ruff>=0.1.0",
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+    "pre-commit>=4.0.0",
+    "types-requests>=2.31.0",
+    "types-PyYAML>=6.0",
 ]
 
 [project.scripts]
-open-go-kr = "open_go_kr_parser.main:main"
+open-go-kr = "src.main:main"
 
 [tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.black]
-line-length = 88
-target-version = ["py311"]
+where = ["."]
 
 [tool.ruff]
 line-length = 88
 target-version = "py311"
+
+[tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
-addopts = "-v --cov=open_go_kr_parser --cov-report=term-missing"
+pythonpath = ["."]
+addopts = "-v --cov=src --cov-report=term-missing"
