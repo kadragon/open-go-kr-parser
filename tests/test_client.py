@@ -5,7 +5,7 @@ import pytest
 import responses
 from requests.exceptions import ConnectionError
 
-from src.client import Document, OpenGoKrClient, OpenGoKrError
+from client import Document, OpenGoKrClient, OpenGoKrError
 
 
 class TestOpenGoKrClient:

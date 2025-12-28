@@ -6,7 +6,7 @@ from tempfile import NamedTemporaryFile
 
 import pytest
 
-from src.config import Agency, load_agencies
+from config import Agency, load_agencies
 
 
 class TestLoadAgencies:

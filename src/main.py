@@ -8,9 +8,9 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from src.client import OpenGoKrClient, OpenGoKrError
-from src.config import load_agencies
-from src.notifier import TelegramError, TelegramNotifier
+from client import OpenGoKrClient, OpenGoKrError
+from config import load_agencies
+from notifier import TelegramError, TelegramNotifier
 
 logging.basicConfig(
     level=logging.INFO,

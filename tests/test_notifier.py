@@ -4,8 +4,8 @@
 import pytest
 import responses
 
-from src.client import Document
-from src.notifier import TelegramError, TelegramNotifier
+from client import Document
+from notifier import TelegramError, TelegramNotifier
 
 
 class TestTelegramNotifier:

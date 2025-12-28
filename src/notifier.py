@@ -3,7 +3,7 @@
 
 import requests
 
-from src.client import Document
+from client import Document
 
 
 class TelegramError(Exception):
