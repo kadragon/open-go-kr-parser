@@ -1,0 +1,19 @@
+# Agency Configuration
+# Add agencies to monitor for document disclosures
+#
+# To find agency codes:
+# 1. Visit https://www.open.go.kr/othicInfo/infoList/orginlInfoList.do
+# 2. Search for the agency in the search popup
+# 3. Inspect the network request to find insttCd value
+
+agencies:
+  - code: "1342000"
+    name: "교육부"
+
+  # Example additional agencies (uncomment to enable):
+  # - code: "1741000"
+  #   name: "행정안전부"
+  # - code: "1660000"
+  #   name: "과학기술정보통신부"
+  # - code: "1350000"
+  #   name: "외교부"

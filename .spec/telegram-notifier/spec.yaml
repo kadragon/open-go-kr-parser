@@ -1,0 +1,56 @@
+spec_id: SPEC-telegram-notifier-001
+title: "Telegram Notification Service"
+description: |
+  Sends formatted document lists to a Telegram chat
+  using the Telegram Bot API.
+
+given_when_then:
+  - given: "A list of documents and valid Telegram credentials"
+    when: "Notifier sends message"
+    then: "Message is delivered to the specified chat"
+
+  - given: "Empty document list"
+    when: "Notifier sends message"
+    then: "Sends 'no documents found' message"
+
+  - given: "Invalid bot token"
+    when: "Notifier sends message"
+    then: "Raises TelegramError with details"
+
+  - given: "Message exceeds Telegram limit (4096 chars)"
+    when: "Notifier sends message"
+    then: "Splits into multiple messages"
+
+acceptance_tests:
+  - id: TEST-telegram-notifier-001
+    desc: "Successfully send formatted document list"
+  - id: TEST-telegram-notifier-002
+    desc: "Handle empty document list with appropriate message"
+  - id: TEST-telegram-notifier-003
+    desc: "Raise error on invalid credentials"
+  - id: TEST-telegram-notifier-004
+    desc: "Split long messages correctly"
+
+message_format: |
+  📋 *{agency_name} 원문정보 ({date})*
+
+  1. [{title}]({url})
+  2. [{title}]({url})
+  ...
+
+  총 {count}건
+
+telegram_api:
+  endpoint: "https://api.telegram.org/bot{token}/sendMessage"
+  method: POST
+  params:
+    - chat_id: "Target chat ID"
+    - text: "Message content"
+    - parse_mode: "MarkdownV2"
+    - disable_web_page_preview: true
+
+dependencies:
+  - governance: coding-style
+  - governance: patterns
+
+linked_tasks: []

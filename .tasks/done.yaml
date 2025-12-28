@@ -1,0 +1,79 @@
+# Completed Tasks
+
+- task_id: TASK-0000
+  spec_id: N/A
+  title: "Project initialization and design"
+  status: done
+  priority: P0
+  test_refs: []
+  created_at: 2025-12-28
+  updated_at: 2025-12-28
+  completed_at: 2025-12-28
+  notes: |
+    - Created project structure (.spec/, .tasks/, .governance/)
+    - Defined specifications for api-client, telegram-notifier, scheduler
+    - Established coding standards and patterns
+
+- task_id: TASK-0001
+  spec_id: SPEC-api-client-001
+  title: "Implement OpenGoKrClient class"
+  status: done
+  priority: P1
+  test_refs:
+    - TEST-api-client-001
+    - TEST-api-client-002
+    - TEST-api-client-003
+    - TEST-api-client-004
+  created_at: 2025-12-28
+  updated_at: 2025-12-28
+  completed_at: 2025-12-28
+  notes: |
+    - TDD: 6 tests written and passing
+    - Handles pagination, network errors, malformed responses
+    - Coverage: 85%
+
+- task_id: TASK-0002
+  spec_id: SPEC-telegram-notifier-001
+  title: "Implement TelegramNotifier class"
+  status: done
+  priority: P1
+  test_refs:
+    - TEST-telegram-notifier-001
+    - TEST-telegram-notifier-002
+    - TEST-telegram-notifier-003
+    - TEST-telegram-notifier-004
+  created_at: 2025-12-28
+  updated_at: 2025-12-28
+  completed_at: 2025-12-28
+  notes: |
+    - TDD: 5 tests written and passing
+    - Supports MarkdownV2 formatting, message splitting
+    - Coverage: 98%
+
+- task_id: TASK-0004
+  spec_id: SPEC-api-client-001
+  title: "Create configuration loader for agencies"
+  status: done
+  priority: P1
+  test_refs: []
+  created_at: 2025-12-28
+  updated_at: 2025-12-28
+  completed_at: 2025-12-28
+  notes: |
+    - TDD: 4 tests written and passing
+    - YAML-based agency configuration
+    - Coverage: 100%
+
+- task_id: TASK-0005
+  spec_id: SPEC-scheduler-001
+  title: "Implement main entry point"
+  status: done
+  priority: P1
+  test_refs: []
+  created_at: 2025-12-28
+  updated_at: 2025-12-28
+  completed_at: 2025-12-28
+  notes: |
+    - CLI with --date and --config options
+    - Reads TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID from env
+    - Graceful error handling for partial failures

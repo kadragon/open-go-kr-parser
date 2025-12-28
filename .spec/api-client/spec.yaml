@@ -1,0 +1,72 @@
+spec_id: SPEC-api-client-001
+title: "Open.go.kr API Client"
+description: |
+  HTTP client for fetching original document information from
+  the Korean government disclosure portal (open.go.kr).
+
+given_when_then:
+  - given: "A valid agency code and date"
+    when: "Client requests document list"
+    then: "Returns list of documents with title, date, and URL"
+
+  - given: "An invalid agency code"
+    when: "Client requests document list"
+    then: "Returns empty list without error"
+
+  - given: "Network failure occurs"
+    when: "Client requests document list"
+    then: "Raises OpenGoKrError with details"
+
+  - given: "API returns malformed response"
+    when: "Client parses response"
+    then: "Raises ParseError with context"
+
+acceptance_tests:
+  - id: TEST-api-client-001
+    desc: "Successfully fetch documents for valid agency and date"
+  - id: TEST-api-client-002
+    desc: "Handle empty result gracefully"
+  - id: TEST-api-client-003
+    desc: "Raise appropriate error on network failure"
+  - id: TEST-api-client-004
+    desc: "Parse document fields correctly (title, date, url, agency)"
+
+data_model:
+  Document:
+    fields:
+      - name: title
+        type: str
+        desc: "Document title"
+      - name: date
+        type: str
+        desc: "Disclosure date (YYYY-MM-DD)"
+      - name: url
+        type: str
+        desc: "Link to original document"
+      - name: agency_name
+        type: str
+        desc: "Disclosing agency name"
+
+api_details:
+  endpoint: "https://www.open.go.kr/othicInfo/infoList/orginlInfoList.ajax"
+  method: POST
+  content_type: "application/x-www-form-urlencoded; charset=UTF-8"
+  required_params:
+    - insttCd: "Agency code (e.g., 1342000 for 교육부)"
+    - insttCdNm: "Agency name (e.g., 교육부) - required for filtering"
+    - startDate: "Start date (YYYYMMDD)"
+    - endDate: "End date (YYYYMMDD)"
+    - viewPage: "Page number"
+    - rowPage: "Results per page"
+  optional_params:
+    - eduYn: "Include elementary/middle/high schools (Y/N, default: N)"
+    - sort: "Sort order (s: date desc, default: s)"
+    - kwd: "Search keyword"
+    - othbcSeCd: "Disclosure type (1: full, 2: partial)"
+    - insttSeCd: "Agency type filter"
+
+dependencies:
+  - governance: coding-style
+  - governance: patterns
+
+linked_tasks: []
