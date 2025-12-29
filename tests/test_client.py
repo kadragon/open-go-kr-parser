@@ -1,5 +1,6 @@
 # Trace: spec_id=SPEC-api-client-001 task_id=TASK-0001
 # Trace: spec_id=SPEC-code-quality-001 task_id=TASK-0009
+# Trace: spec_id=SPEC-code-quality-001 task_id=TASK-0010
 """Tests for OpenGoKrClient."""
 
 import pytest
@@ -252,9 +253,7 @@ class TestOpenGoKrClient:
 
         # Verify only one token acquisition call
         token_calls = [
-            call
-            for call in responses.calls
-            if self.PAGE_URL in call.request.url
+            call for call in responses.calls if self.PAGE_URL in call.request.url
         ]
         assert len(token_calls) == 1
 
@@ -297,8 +296,6 @@ class TestOpenGoKrClient:
         assert len(documents) == 1
         # Verify token was refreshed (2 token acquisition calls)
         token_calls = [
-            call
-            for call in responses.calls
-            if self.PAGE_URL in call.request.url
+            call for call in responses.calls if self.PAGE_URL in call.request.url
         ]
         assert len(token_calls) == 2

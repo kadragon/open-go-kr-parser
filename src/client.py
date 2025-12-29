@@ -1,5 +1,6 @@
 # Trace: spec_id=SPEC-api-client-001 task_id=TASK-0001
 # Trace: spec_id=SPEC-code-quality-001 task_id=TASK-0008
+# Trace: spec_id=SPEC-code-quality-001 task_id=TASK-0010
 """API client for open.go.kr original document disclosure portal."""
 
 import json
@@ -125,9 +126,7 @@ class OpenGoKrClient:
             "sort": "s",
         }
 
-    def _build_detail_url(
-        self, reg_no: str, prod_dt: str, inst_se_cd: str
-    ) -> str:
+    def _build_detail_url(self, reg_no: str, prod_dt: str, inst_se_cd: str) -> str:
         """Build document detail page URL.
 
         Args:

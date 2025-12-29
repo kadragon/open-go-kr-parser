@@ -96,3 +96,6 @@ match = re.search(r"var\s+result\s*=\s*(\{.*?\});", html, re.DOTALL)
 
 ### 2025-12-29 - Lint Fix (TASK-0009)
 - Wrapped long list comprehension lines in tests to satisfy ruff E501
+
+### 2025-12-29 - Format Cleanup (TASK-0010)
+- Applied ruff format to src/client.py and tests/test_client.py
