@@ -19,16 +19,19 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_target_date_range() -> tuple[str, str]:
+def get_target_date_range(today_override: datetime | None = None) -> tuple[str, str]:
     """Get target date range based on current weekday.
 
     - Monday: Previous Friday ~ Sunday (3 days)
     - Tuesday-Sunday: Yesterday only (1 day)
 
+    Args:
+        today_override: Override the current date for testing purposes.
+
     Returns:
         Tuple of (start_date, end_date) strings in YYYY-MM-DD format.
     """
-    today = datetime.now()
+    today = today_override or datetime.now()
     weekday = today.weekday()  # 0=Monday, 4=Friday
 
     if weekday == 0:  # Monday
@@ -97,11 +100,16 @@ def main() -> int:
     args = parser.parse_args()
 
     # Get target date range
-    if args.start_date:
-        start_date = args.start_date
-        end_date = args.end_date if args.end_date else start_date
+    if args.start_date or args.end_date:
+        start_date = args.start_date or args.end_date
+        end_date = args.end_date or start_date
     else:
         start_date, end_date = get_target_date_range()
+
+    # Validate date range
+    if start_date > end_date:
+        logger.error(f"Start date ({start_date}) cannot be after end date ({end_date})")
+        return 1
 
     if start_date == end_date:
         logger.info(f"Fetching documents for date: {start_date}")
