@@ -24,10 +24,28 @@ config/
 
 ## Key Decisions
 
-1. **API Endpoint:** `https://www.open.go.kr/othicInfo/infoList/orginlInfoList.ajax`
-2. **Notification Channel:** Telegram Bot API
-3. **Scheduling:** GitHub Actions cron (daily at 09:00 KST)
-4. **Configuration:** YAML file for agency list, environment variables for secrets
+1. **API Approach:** POST to page URL and parse embedded JSON from HTML (not AJAX endpoint)
+2. **Page URL:** `https://www.open.go.kr/othicInfo/infoList/orginlInfoList.do`
+3. **Notification Channel:** Telegram Bot API
+4. **Scheduling:** GitHub Actions cron (daily at 09:00 KST)
+5. **Configuration:** YAML file for agency list, environment variables for secrets
+
+## Critical API Knowledge
+
+**IMPORTANT:** The open.go.kr AJAX endpoint requires an XSRF token that is generated client-side by JavaScript. This makes direct API calls impossible without browser automation.
+
+**Solution:** POST form data to the page URL (`.do`), and extract embedded JSON from the HTML response:
+```python
+# Response contains: var result = {"rtnList": [...], "rtnTotal": 15};
+match = re.search(r"var\s+result\s*=\s*(\{.*?\});", html, re.DOTALL)
+```
+
+**Response field mapping:**
+- `rtnList` → list of documents (not `list`)
+- `rtnTotal` → total count (not `totalCnt`)
+- `INFO_SJ` → document title
+- `PRDCTN_DT` → production date (YYYYMMDDHHMMSS format)
+- `PROC_INSTT_NM` → agency name
 
 ## Session Log
 
@@ -35,3 +53,10 @@ config/
 - Created project structure following SDD/TDD principles
 - Defined three core specifications: api-client, telegram-notifier, scheduler
 - User requirements confirmed: Telegram notification, configurable agencies, no keyword filtering
+
+### 2025-12-29 - Critical Bug Fix (TASK-0006)
+- Fixed "Invalid response format: missing 'list' field" production error
+- Root cause: AJAX endpoint requires client-side JavaScript-generated XSRF token
+- Solution: Changed from AJAX to HTML parsing approach
+- Used Chrome DevTools MCP to investigate actual browser behavior
+- Integration test verified: fetched 8 documents across 3 agencies

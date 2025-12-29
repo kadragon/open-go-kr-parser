@@ -1,18 +1,31 @@
 # Design Patterns
 
-## API Client Pattern
+## API Client Pattern (HTML Parsing)
+
+When an API requires client-side JavaScript tokens (XSRF/CSRF), use HTML parsing:
 
 ```python
 class OpenGoKrClient:
-    """Stateless client for open.go.kr API."""
+    """Client using HTML parsing to bypass XSRF requirements."""
+    PAGE_URL = "https://www.open.go.kr/othicInfo/infoList/orginlInfoList.do"
 
     def __init__(self, session: requests.Session | None = None):
         self.session = session or requests.Session()
         self._setup_headers()
 
-    def fetch_documents(self, agency_code: str, date: str) -> list[Document]:
-        """Fetch documents for a specific agency and date."""
-        pass
+    def _extract_result_from_html(self, html: str) -> dict:
+        """Extract embedded JSON from HTML response."""
+        # Pattern: var result = {...};
+        match = re.search(r"var\s+result\s*=\s*(\{.*?\});", html, re.DOTALL)
+        if not match:
+            raise OpenGoKrError("Could not find result data")
+        return json.loads(match.group(1))
+
+    def fetch_documents(self, agency_code: str, agency_name: str, date: str) -> list[Document]:
+        """POST to page URL and parse embedded JSON."""
+        response = self.session.post(self.PAGE_URL, data={...})
+        data = self._extract_result_from_html(response.text)
+        return self._parse_response(data)
 ```
 
 ## Configuration Pattern
