@@ -30,6 +30,7 @@ class OpenGoKrClient:
 
     PAGE_URL = "https://www.open.go.kr/othicInfo/infoList/orginlInfoList.do"
     PAGE_SIZE = 10
+    _RESULT_RE = re.compile(r"var\s+result\s*=\s*(\{.*?\});", re.DOTALL)
 
     def __init__(self, session: requests.Session | None = None) -> None:
         """Initialize client with optional session.
@@ -91,7 +92,7 @@ class OpenGoKrClient:
             OpenGoKrError: If result cannot be extracted.
         """
         # Look for: var result = {...};
-        match = re.search(r"var\s+result\s*=\s*(\{.*?\});", html, re.DOTALL)
+        match = self._RESULT_RE.search(html)
         if not match:
             raise OpenGoKrError("Could not find result data in page HTML")
 
@@ -131,7 +132,7 @@ class OpenGoKrClient:
             )
             documents.append(doc)
 
-        return documents, int(total_count) if total_count else 0
+        return documents, int(total_count or 0)
 
     def fetch_documents(
         self, agency_code: str, agency_name: str, date: str

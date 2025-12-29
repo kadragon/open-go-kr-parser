@@ -17,7 +17,9 @@ class TestOpenGoKrClient:
         """Create a client instance for testing."""
         return OpenGoKrClient()
 
-    def _make_html_response(self, rtn_list: list[dict[str, str]], rtn_total: int) -> str:
+    def _make_html_response(
+        self, rtn_list: list[dict[str, str]], rtn_total: int
+    ) -> str:
         """Create mock HTML response with embedded result JSON."""
         import json
 
@@ -53,6 +55,7 @@ class TestOpenGoKrClient:
         assert len(documents) == 2
         assert documents[0].title == "2024년 교육정책 보고서"
         assert documents[0].agency_name == "교육부"
+        assert documents[0].url == ""
         assert documents[0].date == "2025-12-27"
 
     # TEST-api-client-002: Handle empty result gracefully
@@ -117,6 +120,7 @@ class TestOpenGoKrClient:
         assert isinstance(doc, Document)
         assert doc.title == "AI 정책 백서 2025"
         assert doc.agency_name == "과학기술정보통신부"
+        assert doc.url == ""
         assert doc.date == "2025-12-27"
 
     @responses.activate
