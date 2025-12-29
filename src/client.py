@@ -4,7 +4,7 @@
 import json
 import re
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 import requests
 
@@ -46,7 +46,8 @@ class OpenGoKrClient:
             {
                 "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                 "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept": "text/html,application/xhtml+xml,"
+                "application/xml;q=0.9,*/*;q=0.8",
                 "Accept-Language": "ko,en;q=0.9",
             }
         )
@@ -95,7 +96,7 @@ class OpenGoKrClient:
             raise OpenGoKrError("Could not find result data in page HTML")
 
         try:
-            return json.loads(match.group(1))
+            return cast(dict[str, Any], json.loads(match.group(1)))
         except json.JSONDecodeError as e:
             raise OpenGoKrError(f"Failed to parse result JSON: {e}") from e
 
@@ -153,9 +154,12 @@ class OpenGoKrClient:
 
         while True:
             try:
+                params = self._build_request_params(
+                    agency_code, agency_name, date, page
+                )
                 response = self.session.post(
                     self.PAGE_URL,
-                    data=self._build_request_params(agency_code, agency_name, date, page),
+                    data=params,
                     timeout=30,
                 )
                 response.raise_for_status()

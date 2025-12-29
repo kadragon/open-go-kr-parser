@@ -17,7 +17,7 @@ class TestOpenGoKrClient:
         """Create a client instance for testing."""
         return OpenGoKrClient()
 
-    def _make_html_response(self, rtn_list: list, rtn_total: int) -> str:
+    def _make_html_response(self, rtn_list: list[dict[str, str]], rtn_total: int) -> str:
         """Create mock HTML response with embedded result JSON."""
         import json
 
@@ -107,7 +107,9 @@ class TestOpenGoKrClient:
             status=200,
         )
 
-        documents = client.fetch_documents("1660000", "과학기술정보통신부", "2025-12-27")
+        documents = client.fetch_documents(
+            "1660000", "과학기술정보통신부", "2025-12-27"
+        )
 
         assert len(documents) == 1
         doc = documents[0]

@@ -135,7 +135,9 @@ def main() -> int:
             logger.info(f"Processing agency: {agency.name} ({agency.code})")
 
             try:
-                documents = api_client.fetch_documents(agency.code, agency.name, target_date)
+                documents = api_client.fetch_documents(
+                    agency.code, agency.name, target_date
+                )
                 logger.info(f"Found {len(documents)} documents for {agency.name}")
 
                 notifier.send_documents(agency.name, target_date, documents)
