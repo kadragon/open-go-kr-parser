@@ -1,5 +1,7 @@
 # Trace: spec_id=SPEC-scheduler-001 task_id=TASK-0003
 name: Daily Document Notification
+permissions:
+  contents: read
 
 on:
   schedule:
