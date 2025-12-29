@@ -54,25 +54,32 @@ class OpenGoKrClient:
         )
 
     def _build_request_params(
-        self, agency_code: str, agency_name: str, date: str, page: int = 1
+        self,
+        agency_code: str,
+        agency_name: str,
+        start_date: str,
+        end_date: str,
+        page: int = 1,
     ) -> dict[str, str]:
         """Build request parameters for page request.
 
         Args:
             agency_code: Institution code (e.g., "1342000" for 교육부).
             agency_name: Institution name (e.g., "교육부").
-            date: Target date in YYYY-MM-DD format.
+            start_date: Start date in YYYY-MM-DD format.
+            end_date: End date in YYYY-MM-DD format.
             page: Page number (1-indexed).
 
         Returns:
             Dictionary of form parameters.
         """
-        date_formatted = date.replace("-", "")
+        start_formatted = start_date.replace("-", "")
+        end_formatted = end_date.replace("-", "")
         return {
             "insttCd": agency_code,
             "insttCdNm": agency_name,
-            "startDate": date_formatted,
-            "endDate": date_formatted,
+            "startDate": start_formatted,
+            "endDate": end_formatted,
             "eduYn": "N",
             "viewPage": str(page),
             "rowPage": str(self.PAGE_SIZE),
@@ -135,14 +142,19 @@ class OpenGoKrClient:
         return documents, int(total_count or 0)
 
     def fetch_documents(
-        self, agency_code: str, agency_name: str, date: str
+        self,
+        agency_code: str,
+        agency_name: str,
+        start_date: str,
+        end_date: str | None = None,
     ) -> list[Document]:
-        """Fetch all documents for an agency on a specific date.
+        """Fetch all documents for an agency within a date range.
 
         Args:
             agency_code: Institution code (e.g., "1342000" for 교육부).
             agency_name: Institution name (e.g., "교육부").
-            date: Target date in YYYY-MM-DD format.
+            start_date: Start date in YYYY-MM-DD format.
+            end_date: End date in YYYY-MM-DD format. If None, uses start_date.
 
         Returns:
             List of Document objects.
@@ -150,13 +162,16 @@ class OpenGoKrClient:
         Raises:
             OpenGoKrError: On network or parsing errors.
         """
+        if end_date is None:
+            end_date = start_date
+
         all_documents: list[Document] = []
         page = 1
 
         while True:
             try:
                 params = self._build_request_params(
-                    agency_code, agency_name, date, page
+                    agency_code, agency_name, start_date, end_date, page
                 )
                 response = self.session.post(
                     self.PAGE_URL,
