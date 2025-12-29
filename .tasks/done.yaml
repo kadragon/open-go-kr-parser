@@ -118,3 +118,17 @@
     - Refactor only: centralized request timeout and XSRF payload constants
     - Moved Document import to module top-level in main
     - No behavioral changes intended; tests not run
+
+- task_id: TASK-0009
+  spec_id: SPEC-code-quality-001
+  title: "Fix ruff E501 in tests"
+  status: done
+  priority: P2
+  test_refs:
+    - TEST-code-quality-001
+  created_at: 2025-12-29
+  updated_at: 2025-12-29
+  completed_at: 2025-12-29
+  notes: |
+    - Wrapped long list comprehension lines in tests/test_client.py
+    - No behavioral changes intended; lint fix only

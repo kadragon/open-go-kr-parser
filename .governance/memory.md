@@ -93,3 +93,6 @@ match = re.search(r"var\s+result\s*=\s*(\{.*?\});", html, re.DOTALL)
 - Centralized client timeout and XSRF token payload into class constants
 - Moved Document import in main.py to module top-level
 - No behavior changes intended; tests not run
+
+### 2025-12-29 - Lint Fix (TASK-0009)
+- Wrapped long list comprehension lines in tests to satisfy ruff E501
