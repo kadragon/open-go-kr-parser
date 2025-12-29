@@ -1,4 +1,5 @@
 # Trace: spec_id=SPEC-scheduler-001 task_id=TASK-0005
+# Trace: spec_id=SPEC-code-quality-001 task_id=TASK-0008
 """Main entry point for the notification service."""
 
 import argparse
@@ -8,7 +9,7 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from client import OpenGoKrClient, OpenGoKrError
+from client import Document, OpenGoKrClient, OpenGoKrError
 from config import load_agencies
 from notifier import TelegramError, TelegramNotifier
 
@@ -146,7 +147,9 @@ def main() -> int:
     notifier = TelegramNotifier(bot_token, chat_id)
 
     # Process each agency with date range (single API call per agency)
+    all_results: list[tuple[str, list[Document]]] = []
     has_errors = False
+
     for agency in agencies:
         logger.info(f"Processing agency: {agency.name} ({agency.code})")
 
@@ -155,19 +158,23 @@ def main() -> int:
                 agency.code, agency.name, start_date, end_date
             )
             logger.info(f"Found {len(documents)} documents for {agency.name}")
-
-            notifier.send_documents(agency.name, date_display, documents)
-            logger.info(f"Notification sent for {agency.name}")
+            all_results.append((agency.name, documents))
 
         except OpenGoKrError as e:
             logger.error(f"API error for {agency.name}: {e}")
             has_errors = True
             continue
 
+    # Send consolidated notification for all agencies
+    if all_results:
+        try:
+            notifier.send_multi_agency_documents(date_display, all_results)
+            logger.info(
+                f"Consolidated notification sent for {len(all_results)} agencies"
+            )
         except TelegramError as e:
-            logger.error(f"Telegram error for {agency.name}: {e}")
+            logger.error(f"Telegram error: {e}")
             has_errors = True
-            continue
 
     return 1 if has_errors else 0
 

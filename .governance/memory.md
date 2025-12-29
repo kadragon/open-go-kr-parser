@@ -68,3 +68,34 @@ match = re.search(r"var\s+result\s*=\s*(\{.*?\});", html, re.DOTALL)
 - CLI args changed: `--dates` → `--start-date` and `--end-date`
 - `get_target_dates()` → `get_target_date_range()` returning (start, end) tuple
 - Reduces API load and improves efficiency
+
+### 2025-12-29 - AJAX Endpoint with XSRF Token (TASK-0007)
+- **Problem:** Document URLs were missing (`url=""` hardcoded)
+- **Solution:** Switched from HTML parsing to AJAX endpoint with XSRF token authentication
+- **Key Changes:**
+  - Added XSRF token acquisition: POST to `.do` page → Extract from cookies
+  - Switched to AJAX endpoint: `orginlInfoList.ajax` instead of HTML parsing
+  - Headers updated: `X-Requested-With: XMLHttpRequest`, `Accept: application/json`
+  - URL construction from response fields: `PRDCTN_INSTT_REGIST_NO`, `PRDCTN_DT`, `INSTT_SE_CD`
+  - URL pattern: `https://www.open.go.kr/othicInfo/infoList/infoListDetl.do?prdnNstRgstNo={reg_no}&prdnDt={prod_dt}&nstSeCd={inst_se_cd}`
+- **Multi-Agency Message Consolidation:**
+  - Changed from per-agency messages to single consolidated message
+  - All agencies in one Telegram message with sections
+  - Format: "📋 원문정보 (date)\n\n총 N개 부서, M건\n\n▫️ 부서명 (X건)\n  1. [문서](url)\n..."
+- **Token Management:**
+  - Token acquired once per session and reused
+  - Automatic refresh on 401/403 errors (one retry)
+  - Cached in session headers for all AJAX requests
+- **Response Format:** AJAX and HTML responses use SAME field names (rtnList, INFO_SJ, etc.)
+- **Testing:** Added XSRF token mocking, URL validation, token caching tests
+
+### 2025-12-29 - Code Quality Refactor (TASK-0008)
+- Centralized client timeout and XSRF token payload into class constants
+- Moved Document import in main.py to module top-level
+- No behavior changes intended; tests not run
+
+### 2025-12-29 - Lint Fix (TASK-0009)
+- Wrapped long list comprehension lines in tests to satisfy ruff E501
+
+### 2025-12-29 - Format Cleanup (TASK-0010)
+- Applied ruff format to src/client.py and tests/test_client.py

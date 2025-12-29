@@ -1,0 +1,30 @@
+spec_id: SPEC-code-quality-001
+title: "Code Quality: Remove Magic Numbers and Normalize Imports"
+description: |
+  Improve maintainability by centralizing fixed values (timeouts, payloads)
+  and ensuring imports are consistently placed at the top of modules.
+
+given_when_then:
+  - given: "XSRF token acquisition request"
+    when: "Client posts to the page URL"
+    then: "Uses shared payload and timeout constants"
+
+  - given: "AJAX document request"
+    when: "Client posts to the AJAX endpoint"
+    then: "Uses the shared request timeout constant"
+
+  - given: "Main entry point imports"
+    when: "Document type is referenced"
+    then: "Import is declared at module top-level"
+
+acceptance_tests:
+  - id: TEST-code-quality-001
+    desc: "OpenGoKrClient uses REQUEST_TIMEOUT and _XSRF_TOKEN_PAYLOAD constants"
+  - id: TEST-code-quality-002
+    desc: "main.py places Document import at module top-level"
+
+dependencies:
+  - governance: coding-style
+
+linked_tasks:
+  - TASK-0008
