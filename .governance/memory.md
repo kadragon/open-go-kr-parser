@@ -60,3 +60,11 @@ match = re.search(r"var\s+result\s*=\s*(\{.*?\});", html, re.DOTALL)
 - Solution: Changed from AJAX to HTML parsing approach
 - Used Chrome DevTools MCP to investigate actual browser behavior
 - Integration test verified: fetched 8 documents across 3 agencies
+
+### 2025-12-29 - Date Range Query Optimization
+- Changed from per-day API calls to single date-range query
+- Previously: Monday fetched Fri/Sat/Sun with 3 separate API calls per agency
+- Now: Single API call with startDate~endDate range (e.g., "20251227" ~ "20251229")
+- CLI args changed: `--dates` → `--start-date` and `--end-date`
+- `get_target_dates()` → `get_target_date_range()` returning (start, end) tuple
+- Reduces API load and improves efficiency
