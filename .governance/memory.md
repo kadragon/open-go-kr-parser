@@ -88,3 +88,8 @@ match = re.search(r"var\s+result\s*=\s*(\{.*?\});", html, re.DOTALL)
   - Cached in session headers for all AJAX requests
 - **Response Format:** AJAX and HTML responses use SAME field names (rtnList, INFO_SJ, etc.)
 - **Testing:** Added XSRF token mocking, URL validation, token caching tests
+
+### 2025-12-29 - Code Quality Refactor (TASK-0008)
+- Centralized client timeout and XSRF token payload into class constants
+- Moved Document import in main.py to module top-level
+- No behavior changes intended; tests not run

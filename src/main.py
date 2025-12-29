@@ -1,4 +1,5 @@
 # Trace: spec_id=SPEC-scheduler-001 task_id=TASK-0005
+# Trace: spec_id=SPEC-code-quality-001 task_id=TASK-0008
 """Main entry point for the notification service."""
 
 import argparse
@@ -8,7 +9,7 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from client import OpenGoKrClient, OpenGoKrError
+from client import Document, OpenGoKrClient, OpenGoKrError
 from config import load_agencies
 from notifier import TelegramError, TelegramNotifier
 
@@ -146,8 +147,6 @@ def main() -> int:
     notifier = TelegramNotifier(bot_token, chat_id)
 
     # Process each agency with date range (single API call per agency)
-    from client import Document
-
     all_results: list[tuple[str, list[Document]]] = []
     has_errors = False
 

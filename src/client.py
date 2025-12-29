@@ -1,4 +1,5 @@
 # Trace: spec_id=SPEC-api-client-001 task_id=TASK-0001
+# Trace: spec_id=SPEC-code-quality-001 task_id=TASK-0008
 """API client for open.go.kr original document disclosure portal."""
 
 import json
@@ -31,6 +32,8 @@ class OpenGoKrClient:
     AJAX_URL = "https://www.open.go.kr/othicInfo/infoList/orginlInfoList.ajax"
     DETAIL_URL_BASE = "https://www.open.go.kr/othicInfo/infoList/infoListDetl.do"
     PAGE_SIZE = 10
+    REQUEST_TIMEOUT = 30
+    _XSRF_TOKEN_PAYLOAD = {"rowPage": "1", "viewPage": "1"}
 
     def __init__(self, session: requests.Session | None = None) -> None:
         """Initialize client with optional session.
@@ -68,8 +71,8 @@ class OpenGoKrClient:
             # Make a minimal request to get session cookies
             response = self.session.post(
                 self.PAGE_URL,
-                data={"rowPage": "1", "viewPage": "1"},
-                timeout=30,
+                data=self._XSRF_TOKEN_PAYLOAD,
+                timeout=self.REQUEST_TIMEOUT,
             )
             response.raise_for_status()
 
@@ -223,7 +226,7 @@ class OpenGoKrClient:
                     response = self.session.post(
                         self.AJAX_URL,
                         data=params,
-                        timeout=30,
+                        timeout=self.REQUEST_TIMEOUT,
                     )
                     response.raise_for_status()
 
