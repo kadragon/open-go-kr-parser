@@ -169,3 +169,73 @@ class TelegramNotifier:
             self._send_message(chunk)
 
         return True
+
+    def send_multi_agency_documents(
+        self, date: str, agencies_documents: list[tuple[str, list[Document]]]
+    ) -> bool:
+        """Send consolidated notification for multiple agencies.
+
+        Args:
+            date: Date or date range string.
+            agencies_documents: List of (agency_name, documents) tuples.
+
+        Returns:
+            True if all messages sent successfully.
+
+        Raises:
+            TelegramError: On API or network errors.
+        """
+        message = self._format_multi_agency_message(date, agencies_documents)
+        chunks = self._split_message(message)
+
+        for chunk in chunks:
+            self._send_message(chunk)
+
+        return True
+
+    def _format_multi_agency_message(
+        self, date: str, agencies_documents: list[tuple[str, list[Document]]]
+    ) -> str:
+        """Format documents from multiple agencies into a single message.
+
+        Args:
+            date: Date or date range string.
+            agencies_documents: List of (agency_name, documents) tuples.
+
+        Returns:
+            Formatted message string with all agencies.
+        """
+        if not agencies_documents:
+            escaped_date = self._escape_markdown(date)
+            return f"📋 *원문정보 \\({escaped_date}\\)*\n\n공개된 문서가 없습니다\\."
+
+        # Count total documents
+        total_docs = sum(len(docs) for _, docs in agencies_documents)
+        agency_count = len(agencies_documents)
+
+        escaped_date = self._escape_markdown(date)
+        header = (
+            f"📋 *원문정보 \\({escaped_date}\\)*\n\n"
+            f"총 {agency_count}개 부서, {total_docs}건\n\n"
+        )
+
+        sections = []
+        for agency_name, documents in agencies_documents:
+            if not documents:
+                continue
+
+            escaped_agency = self._escape_markdown(agency_name)
+            section_header = f"▫️ *{escaped_agency}* \\({len(documents)}건\\)\n"
+
+            lines = []
+            for i, doc in enumerate(documents, 1):
+                escaped_title = self._escape_markdown(doc.title)
+                if doc.url:
+                    lines.append(f"  {i}\\. [{escaped_title}]({doc.url})")
+                else:
+                    lines.append(f"  {i}\\. {escaped_title}")
+
+            section = section_header + "\n".join(lines)
+            sections.append(section)
+
+        return header + "\n\n".join(sections)
