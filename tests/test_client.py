@@ -1,6 +1,8 @@
 # Trace: spec_id=SPEC-api-client-001 task_id=TASK-0011
 """Tests for OpenGoKrClient."""
 
+import json
+
 import pytest
 import responses
 
@@ -21,8 +23,6 @@ class TestOpenGoKrClient:
         self, rtn_list: list[dict[str, str]], rtn_total: int
     ) -> str:
         """Create mock HTML response with embedded JSON."""
-        import json
-
         result_json = json.dumps({"rtnList": rtn_list, "rtnTotal": rtn_total})
         return f"""
         <html>

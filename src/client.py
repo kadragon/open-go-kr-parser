@@ -30,6 +30,7 @@ class OpenGoKrClient:
 
     PAGE_URL = "https://www.open.go.kr/othicInfo/infoList/orginlInfoList.do"
     PAGE_SIZE = 10
+    REQUEST_TIMEOUT = 30
     _RESULT_RE = re.compile(r"var\s+result\s*=\s*(\{.*?\});", re.DOTALL)
 
     def __init__(self, session: requests.Session | None = None) -> None:
@@ -176,7 +177,7 @@ class OpenGoKrClient:
                 response = self.session.post(
                     self.PAGE_URL,
                     data=params,
-                    timeout=30,
+                    timeout=self.REQUEST_TIMEOUT,
                 )
                 response.raise_for_status()
                 data = self._extract_result_from_html(response.text)
