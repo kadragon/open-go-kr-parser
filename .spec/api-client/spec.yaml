@@ -49,24 +49,19 @@ data_model:
 
 api_details:
   authentication:
-    type: "XSRF Token (Cookie-based)"
-    token_acquisition: "POST to https://www.open.go.kr/othicInfo/infoList/orginlInfoList.do"
-    token_source: "XSRF-TOKEN cookie from response"
-    token_usage: "Include in x-xsrf-token header for AJAX requests"
-    token_lifetime: "Session-based (reusable across multiple requests)"
-    token_refresh: "On 401/403 errors, clear and re-acquire token"
+    type: "None (public HTML page)"
+    notes: "AJAX endpoint requires client-side JavaScript-generated XSRF token; use HTML parsing instead"
 
-  endpoint: "https://www.open.go.kr/othicInfo/infoList/orginlInfoList.ajax"
+  endpoint: "https://www.open.go.kr/othicInfo/infoList/orginlInfoList.do"
   method: POST
-  content_type: "application/x-www-form-urlencoded; charset=UTF-8"
+  content_type: "application/x-www-form-urlencoded"
   headers:
-    - X-Requested-With: "XMLHttpRequest"
-    - Accept: "application/json, text/javascript, */*; q=0.01"
-    - x-xsrf-token: "{XSRF_TOKEN}"
+    - Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+    - Accept-Language: "ko,en;q=0.9"
 
   required_params:
     - insttCd: "Agency code (e.g., 1342000 for 교육부)"
-    - insttCdNm: "Agency name (e.g., 교육부) - required for filtering"
+    - insttCdNm: "Agency name (e.g., 교육부)"
     - startDate: "Start date (YYYYMMDD)"
     - endDate: "End date (YYYYMMDD)"
     - viewPage: "Page number"
@@ -74,12 +69,10 @@ api_details:
   optional_params:
     - eduYn: "Include elementary/middle/high schools (Y/N, default: N)"
     - sort: "Sort order (s: date desc, default: s)"
-    - kwd: "Search keyword"
-    - othbcSeCd: "Disclosure type (1: full, 2: partial)"
-    - insttSeCd: "Agency type filter"
 
   response_format:
-    structure: "JSON (nested in 'result' key)"
+    structure: "HTML page with embedded JavaScript containing JSON data"
+    extraction_pattern: 'var\s+result\s*=\s*(\{.*?\});'
     fields:
       - rtnList: "Array of document objects"
       - rtnTotal: "Total count of documents"
@@ -87,15 +80,6 @@ api_details:
       - INFO_SJ: "Document title"
       - PRDCTN_DT: "Production datetime (YYYYMMDDHHmmss)"
       - PROC_INSTT_NM: "Agency name"
-      - PRDCTN_INSTT_REGIST_NO: "Document registration number (for URL construction)"
-      - INSTT_SE_CD: "Institution type code (for URL construction)"
-
-  url_construction:
-    pattern: "https://www.open.go.kr/othicInfo/infoList/infoListDetl.do?prdnNstRgstNo={PRDCTN_INSTT_REGIST_NO}&prdnDt={PRDCTN_DT}&nstSeCd={INSTT_SE_CD}"
-    required_fields:
-      - PRDCTN_INSTT_REGIST_NO
-      - PRDCTN_DT
-      - INSTT_SE_CD
 
 dependencies:
   - governance: coding-style

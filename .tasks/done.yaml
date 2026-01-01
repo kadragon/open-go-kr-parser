@@ -146,3 +146,27 @@
   notes: |
     - Ran ruff format for src/client.py and tests/test_client.py
     - Formatting only; no behavior changes
+- task_id: TASK-0011
+  spec_id: SPEC-api-client-001
+  title: "Revert to HTML parsing approach - XSRF token no longer available"
+  status: done
+  priority: P0
+  test_refs:
+    - TEST-api-client-001
+    - TEST-api-client-002
+    - TEST-api-client-003
+    - TEST-api-client-004
+  created_at: 2026-01-01
+  updated_at: 2026-01-01
+  completed_at: 2026-01-01
+  notes: |
+    - Bug: GitHub Actions workflow failing with "XSRF-TOKEN not found in response cookies"
+    - Root cause: Server stopped providing XSRF-TOKEN cookie (as of 2026-01-01)
+    - Solution: Reverted from AJAX + XSRF token approach (PR #6) back to HTML parsing
+    - Changes made:
+      - Reverted client.py to HTML parsing implementation from commit c125327
+      - Updated all 6 tests to mock HTML responses instead of AJAX JSON
+      - Removed XSRF token specific tests
+      - Updated spec.yaml to reflect HTML parsing approach
+    - All tests passing (6/6) with 94% coverage
+    - Integration verified: Successfully fetched 4 documents for 교육부 on 2025-12-31

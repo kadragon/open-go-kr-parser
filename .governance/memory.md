@@ -99,3 +99,17 @@ match = re.search(r"var\s+result\s*=\s*(\{.*?\});", html, re.DOTALL)
 
 ### 2025-12-29 - Format Cleanup (TASK-0010)
 - Applied ruff format to src/client.py and tests/test_client.py
+
+### 2026-01-01 - Revert to HTML Parsing (TASK-0011)
+- **Production issue**: GitHub Actions workflow failing with "XSRF-TOKEN not found in response cookies"
+- **Root cause**: open.go.kr server stopped providing XSRF-TOKEN cookie (changed between 2025-12-29 and 2026-01-01)
+- **Investigation**: Tested XSRF token acquisition locally - confirmed cookie is no longer set by server
+- **Solution**: Reverted from AJAX + XSRF token approach (PR #6) back to HTML parsing approach
+- **Key lesson**: HTML parsing approach is more stable than AJAX with token authentication for this API
+- **Files changed**:
+  - `src/client.py`: Reverted to HTML parsing implementation (removed all XSRF token logic)
+  - `tests/test_client.py`: Updated all 6 tests to mock HTML responses instead of AJAX JSON
+  - `.spec/api-client/spec.yaml`: Updated to reflect HTML parsing approach
+- **Tradeoffs**: URLs are no longer available (set to empty string) - acceptable for notification use case
+- All tests passing (6/6) with 94% coverage
+- Integration verified: Successfully fetched 4 documents for 교육부 on 2025-12-31
