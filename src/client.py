@@ -197,7 +197,11 @@ class OpenGoKrClient:
             all_documents.extend(filtered_documents)
 
             # Check if we need to fetch more pages
-            if fetched_count >= total_count or not documents:
+            if not documents:
+                break
+            if fetched_count >= total_count:
+                break
+            if len(documents) < self.PAGE_SIZE:
                 break
 
             page += 1
