@@ -43,6 +43,9 @@ htmlcov/
 # Type checking
 .mypy_cache/
 
+# Codex/Serena
+.serena/
+
 # Local configuration (secrets)
 .env.local
 *.local.yaml
