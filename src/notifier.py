@@ -43,10 +43,24 @@ class TelegramNotifier:
         Returns:
             Escaped text safe for MarkdownV2.
         """
-        special_chars = "_*[]()~`>#+-=|{}.!"
+        special_chars = "\\_*[]()~`>#+-=|{}.!"
         for char in special_chars:
-            text = text.replace(char, f"\\{char}")
+            if char == "\\":
+                text = text.replace("\\", "\\\\")
+            else:
+                text = text.replace(char, f"\\{char}")
         return text
+
+    def _escape_markdown_url(self, url: str) -> str:
+        """Escape URL for Telegram MarkdownV2 link.
+
+        Args:
+            url: URL to escape.
+
+        Returns:
+            Escaped URL safe for MarkdownV2 links.
+        """
+        return url.replace("\\", "\\\\").replace(")", "\\)")
 
     def _format_title(self, document: Document) -> str:
         """Format document title with optional link suffix.
@@ -91,7 +105,8 @@ class TelegramNotifier:
         for i, doc in enumerate(documents, 1):
             escaped_title = self._format_title(doc)
             if doc.url:
-                lines.append(f"{i}\\. [{escaped_title}]({doc.url})")
+                escaped_url = self._escape_markdown_url(doc.url)
+                lines.append(f"{i}\\. [{escaped_title}]({escaped_url})")
             else:
                 lines.append(f"{i}\\. {escaped_title}")
 
@@ -248,7 +263,8 @@ class TelegramNotifier:
             for i, doc in enumerate(documents, 1):
                 escaped_title = self._format_title(doc)
                 if doc.url:
-                    lines.append(f"  {i}\\. [{escaped_title}]({doc.url})")
+                    escaped_url = self._escape_markdown_url(doc.url)
+                    lines.append(f"  {i}\\. [{escaped_title}]({escaped_url})")
                 else:
                     lines.append(f"  {i}\\. {escaped_title}")
 

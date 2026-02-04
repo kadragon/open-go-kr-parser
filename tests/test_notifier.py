@@ -178,3 +178,21 @@ class TestTelegramNotifier:
 
         assert r"\[바로가기\]" in message
         assert message.count(r"\[바로가기\]") == 1
+
+    def test_format_message_escapes_title_and_url(
+        self, notifier: TelegramNotifier
+    ) -> None:
+        """Escape backslashes in titles and special chars in URLs."""
+        documents = [
+            Document(
+                title="파일\\경로 안내",
+                date="2025-12-27",
+                url="https://example.com/a)b\\c",
+                agency_name="교육부",
+            )
+        ]
+
+        message = notifier._format_documents_message("교육부", "2025-12-27", documents)
+
+        assert "파일\\\\경로" in message
+        assert "https://example.com/a\\)b\\\\c" in message
