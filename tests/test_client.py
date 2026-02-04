@@ -188,3 +188,34 @@ class TestOpenGoKrClient:
         documents = client.fetch_documents("1342000", "교육부", "2025-12-27")
 
         assert len(documents) == 15
+
+    # TEST-api-client-005: Filter out personnel appointment documents
+    @responses.activate
+    def test_fetch_documents_filters_personnel_appointments(
+        self, client: OpenGoKrClient
+    ) -> None:
+        """Filter documents containing '인사발령' in the title."""
+        mock_docs = [
+            {
+                "INFO_SJ": "2025년 1월 인사발령 안내",
+                "PRDCTN_DT": "20251227120000",
+                "PROC_INSTT_NM": "교육부",
+            },
+            {
+                "INFO_SJ": "학교 시설 관리 지침",
+                "PRDCTN_DT": "20251227140000",
+                "PROC_INSTT_NM": "교육부",
+            },
+        ]
+
+        responses.add(
+            responses.POST,
+            self.PAGE_URL,
+            body=self._make_html_response(mock_docs, 2),
+            status=200,
+        )
+
+        documents = client.fetch_documents("1342000", "교육부", "2025-12-27")
+
+        assert len(documents) == 1
+        assert all("인사발령" not in doc.title for doc in documents)

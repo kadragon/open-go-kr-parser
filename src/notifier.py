@@ -48,6 +48,20 @@ class TelegramNotifier:
             text = text.replace(char, f"\\{char}")
         return text
 
+    def _format_title(self, document: Document) -> str:
+        """Format document title with optional link suffix.
+
+        Args:
+            document: Document to format.
+
+        Returns:
+            Escaped title string for MarkdownV2.
+        """
+        title = document.title
+        if document.url:
+            title = f"{title} [바로가기]"
+        return self._escape_markdown(title)
+
     def _format_documents_message(
         self, agency_name: str, date: str, documents: list[Document]
     ) -> str:
@@ -75,8 +89,11 @@ class TelegramNotifier:
 
         lines = []
         for i, doc in enumerate(documents, 1):
-            escaped_title = self._escape_markdown(doc.title)
-            lines.append(f"{i}\\. [{escaped_title}]({doc.url})")
+            escaped_title = self._format_title(doc)
+            if doc.url:
+                lines.append(f"{i}\\. [{escaped_title}]({doc.url})")
+            else:
+                lines.append(f"{i}\\. {escaped_title}")
 
         footer = f"\n\n총 {len(documents)}건"
         return header + "\n".join(lines) + footer
@@ -229,7 +246,7 @@ class TelegramNotifier:
 
             lines = []
             for i, doc in enumerate(documents, 1):
-                escaped_title = self._escape_markdown(doc.title)
+                escaped_title = self._format_title(doc)
                 if doc.url:
                     lines.append(f"  {i}\\. [{escaped_title}]({doc.url})")
                 else:

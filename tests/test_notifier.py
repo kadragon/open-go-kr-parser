@@ -154,3 +154,27 @@ class TestTelegramNotifier:
         # URL encoded Korean text or actual text should be present
         assert request_body is not None
         assert len(request_body) > 0
+
+    def test_format_message_appends_link_suffix(
+        self, notifier: TelegramNotifier
+    ) -> None:
+        """Append [바로가기] to titles when URL is present."""
+        documents = [
+            Document(
+                title="교육 정책 안내",
+                date="2025-12-27",
+                url="https://example.com/doc",
+                agency_name="교육부",
+            ),
+            Document(
+                title="내부 참고 문서",
+                date="2025-12-27",
+                url="",
+                agency_name="교육부",
+            ),
+        ]
+
+        message = notifier._format_documents_message("교육부", "2025-12-27", documents)
+
+        assert r"\[바로가기\]" in message
+        assert message.count(r"\[바로가기\]") == 1

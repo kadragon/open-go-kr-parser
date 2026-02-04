@@ -189,7 +189,10 @@ class OpenGoKrClient:
                 raise OpenGoKrError(f"Request failed: {e}") from e
 
             documents, total_count = self._parse_response(data)
-            all_documents.extend(documents)
+            filtered_documents = [
+                doc for doc in documents if "인사발령" not in doc.title
+            ]
+            all_documents.extend(filtered_documents)
 
             # Check if we need to fetch more pages
             if len(all_documents) >= total_count or not documents:
