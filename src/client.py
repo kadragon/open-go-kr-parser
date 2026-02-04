@@ -167,6 +167,7 @@ class OpenGoKrClient:
             end_date = start_date
 
         all_documents: list[Document] = []
+        fetched_count = 0
         page = 1
 
         while True:
@@ -189,13 +190,14 @@ class OpenGoKrClient:
                 raise OpenGoKrError(f"Request failed: {e}") from e
 
             documents, total_count = self._parse_response(data)
+            fetched_count += len(documents)
             filtered_documents = [
                 doc for doc in documents if "인사발령" not in doc.title
             ]
             all_documents.extend(filtered_documents)
 
             # Check if we need to fetch more pages
-            if len(all_documents) >= total_count or not documents:
+            if fetched_count >= total_count or not documents:
                 break
 
             page += 1
