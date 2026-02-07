@@ -152,7 +152,10 @@ class TestTelegramNotifier:
                 "교육부",
                 [
                     Document(
-                        title=f"매우 긴 제목의 원문정보 문서 {i} - 데이터 품질 점검 및 보고서",
+                        title=(
+                            f"매우 긴 제목의 원문정보 문서 {i} - "
+                            "데이터 품질 점검 및 보고서"
+                        ),
                         date="2025-12-27",
                         url=f"https://example.com/very/long/path/document/{i}",
                         agency_name="교육부",
@@ -161,13 +164,15 @@ class TestTelegramNotifier:
                 ],
             )
         ]
-        for message_id in range(500, 510):
-            responses.add(
-                responses.POST,
-                self.API_URL,
-                json={"ok": True, "result": {"message_id": message_id}},
-                status=200,
-            )
+        responses.add_callback(
+            responses.POST,
+            self.API_URL,
+            callback=lambda _request: (
+                200,
+                {},
+                '{"ok": true, "result": {"message_id": 123}}',
+            ),
+        )
 
         result = notifier.send_multi_agency_documents("2025-12-27", agencies_documents)
 
@@ -275,7 +280,9 @@ class TestTelegramNotifier:
         assert "파일\\\\경로" in message
         assert "https://example.com/a\\)b\\\\c" in message
 
-    def test_format_multi_agency_message_empty(self, notifier: TelegramNotifier) -> None:
+    def test_format_multi_agency_message_empty(
+        self, notifier: TelegramNotifier
+    ) -> None:
         """Return no-document message when multi-agency input is empty."""
         message = notifier._format_multi_agency_message("2025-12-27", [])
 
@@ -316,7 +323,9 @@ class TestTelegramNotifier:
             ),
         ]
 
-        message = notifier._format_multi_agency_message("2025-12-27", agencies_documents)
+        message = notifier._format_multi_agency_message(
+            "2025-12-27", agencies_documents
+        )
 
         assert "총 2개 부서, 3건" in message
 
@@ -339,7 +348,9 @@ class TestTelegramNotifier:
             ),
         ]
 
-        message = notifier._format_multi_agency_message("2025-12-27", agencies_documents)
+        message = notifier._format_multi_agency_message(
+            "2025-12-27", agencies_documents
+        )
 
         assert "▫️ *교육부*" not in message
         assert "▫️ *행정안전부*" in message
@@ -362,7 +373,9 @@ class TestTelegramNotifier:
             )
         ]
 
-        message = notifier._format_multi_agency_message("2025-12-27", agencies_documents)
+        message = notifier._format_multi_agency_message(
+            "2025-12-27", agencies_documents
+        )
 
         assert "파일\\\\경로" in message
         assert "https://example.com/a\\)b\\\\c" in message
@@ -385,7 +398,9 @@ class TestTelegramNotifier:
             )
         ]
 
-        message = notifier._format_multi_agency_message("2025-12-27", agencies_documents)
+        message = notifier._format_multi_agency_message(
+            "2025-12-27", agencies_documents
+        )
 
         assert "  1\\. 일반 문서" in message
         assert "](https://" not in message
