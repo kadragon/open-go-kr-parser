@@ -1,13 +1,14 @@
 """Tests for main entry point and orchestration."""
 
-from datetime import datetime
-from pathlib import Path
 import runpy
 import sys
+from datetime import datetime
+from pathlib import Path
 from types import SimpleNamespace
 
-import main as main_module
 import pytest
+
+import main as main_module
 
 
 def test_get_target_date_range_monday_returns_friday_to_sunday() -> None:
