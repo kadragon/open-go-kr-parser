@@ -25,14 +25,5 @@ jobs:
       - name: Install dependencies
         run: uv sync --all-extras
 
-      - name: Run ruff check
-        run: uv run ruff check src tests
-
-      - name: Run ruff format check
-        run: uv run ruff format --check src tests
-
-      - name: Run mypy
-        run: uv run mypy src
-
-      - name: Run tests
-        run: uv run pytest --no-cov
+      - name: Run pre-commit checks
+        run: uv run pre-commit run --all-files
