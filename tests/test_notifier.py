@@ -96,6 +96,84 @@ class TestTelegramNotifier:
 
         assert "401" in str(exc_info.value) or "Unauthorized" in str(exc_info.value)
 
+    @responses.activate
+    def test_send_documents_network_error(self, notifier: TelegramNotifier) -> None:
+        """Wrap request-level network failures as TelegramError."""
+        import requests
+
+        responses.add(
+            responses.POST,
+            self.API_URL,
+            body=requests.exceptions.ConnectionError("Connection aborted"),
+        )
+
+        with pytest.raises(TelegramError) as exc_info:
+            notifier.send_documents("교육부", "2025-12-27", [])
+
+        assert "Network error" in str(exc_info.value)
+
+    @responses.activate
+    def test_send_multi_agency_documents_success(
+        self, notifier: TelegramNotifier
+    ) -> None:
+        """Send consolidated multi-agency notification successfully."""
+        agencies_documents = [
+            (
+                "교육부",
+                [
+                    Document(
+                        title="2024년 교육정책 보고서",
+                        date="2025-12-27",
+                        url="https://example.com/doc1",
+                        agency_name="교육부",
+                    )
+                ],
+            )
+        ]
+        responses.add(
+            responses.POST,
+            self.API_URL,
+            json={"ok": True, "result": {"message_id": 321}},
+            status=200,
+        )
+
+        result = notifier.send_multi_agency_documents("2025-12-27", agencies_documents)
+
+        assert result is True
+        assert len(responses.calls) == 1
+
+    @responses.activate
+    def test_send_multi_agency_documents_long_message(
+        self, notifier: TelegramNotifier
+    ) -> None:
+        """Split and send multi-agency message when it exceeds Telegram limit."""
+        agencies_documents = [
+            (
+                "교육부",
+                [
+                    Document(
+                        title=f"매우 긴 제목의 원문정보 문서 {i} - 데이터 품질 점검 및 보고서",
+                        date="2025-12-27",
+                        url=f"https://example.com/very/long/path/document/{i}",
+                        agency_name="교육부",
+                    )
+                    for i in range(80)
+                ],
+            )
+        ]
+        for message_id in range(500, 510):
+            responses.add(
+                responses.POST,
+                self.API_URL,
+                json={"ok": True, "result": {"message_id": message_id}},
+                status=200,
+            )
+
+        result = notifier.send_multi_agency_documents("2025-12-27", agencies_documents)
+
+        assert result is True
+        assert len(responses.calls) >= 2
+
     # TEST-telegram-notifier-004: Split long messages correctly
     @responses.activate
     def test_send_documents_long_message(self, notifier: TelegramNotifier) -> None:
@@ -196,3 +274,118 @@ class TestTelegramNotifier:
 
         assert "파일\\\\경로" in message
         assert "https://example.com/a\\)b\\\\c" in message
+
+    def test_format_multi_agency_message_empty(self, notifier: TelegramNotifier) -> None:
+        """Return no-document message when multi-agency input is empty."""
+        message = notifier._format_multi_agency_message("2025-12-27", [])
+
+        assert "공개된 문서가 없습니다\\." in message
+
+    def test_format_multi_agency_message_header_counts(
+        self, notifier: TelegramNotifier
+    ) -> None:
+        """Include agency count and total document count in header."""
+        agencies_documents = [
+            (
+                "교육부",
+                [
+                    Document(
+                        title="문서 1",
+                        date="2025-12-27",
+                        url="",
+                        agency_name="교육부",
+                    ),
+                    Document(
+                        title="문서 2",
+                        date="2025-12-27",
+                        url="",
+                        agency_name="교육부",
+                    ),
+                ],
+            ),
+            (
+                "행정안전부",
+                [
+                    Document(
+                        title="문서 3",
+                        date="2025-12-27",
+                        url="",
+                        agency_name="행정안전부",
+                    )
+                ],
+            ),
+        ]
+
+        message = notifier._format_multi_agency_message("2025-12-27", agencies_documents)
+
+        assert "총 2개 부서, 3건" in message
+
+    def test_format_multi_agency_message_skips_empty_agency(
+        self, notifier: TelegramNotifier
+    ) -> None:
+        """Skip section rendering for agencies with zero documents."""
+        agencies_documents = [
+            ("교육부", []),
+            (
+                "행정안전부",
+                [
+                    Document(
+                        title="문서 1",
+                        date="2025-12-27",
+                        url="",
+                        agency_name="행정안전부",
+                    )
+                ],
+            ),
+        ]
+
+        message = notifier._format_multi_agency_message("2025-12-27", agencies_documents)
+
+        assert "▫️ *교육부*" not in message
+        assert "▫️ *행정안전부*" in message
+
+    def test_format_multi_agency_message_escapes_link_entries(
+        self, notifier: TelegramNotifier
+    ) -> None:
+        """Escape title and URL when formatting multi-agency link entries."""
+        agencies_documents = [
+            (
+                "교육부",
+                [
+                    Document(
+                        title="파일\\경로 안내",
+                        date="2025-12-27",
+                        url="https://example.com/a)b\\c",
+                        agency_name="교육부",
+                    )
+                ],
+            )
+        ]
+
+        message = notifier._format_multi_agency_message("2025-12-27", agencies_documents)
+
+        assert "파일\\\\경로" in message
+        assert "https://example.com/a\\)b\\\\c" in message
+
+    def test_format_multi_agency_message_plain_entries_without_url(
+        self, notifier: TelegramNotifier
+    ) -> None:
+        """Format entries without URLs as plain numbered lines."""
+        agencies_documents = [
+            (
+                "교육부",
+                [
+                    Document(
+                        title="일반 문서",
+                        date="2025-12-27",
+                        url="",
+                        agency_name="교육부",
+                    )
+                ],
+            )
+        ]
+
+        message = notifier._format_multi_agency_message("2025-12-27", agencies_documents)
+
+        assert "  1\\. 일반 문서" in message
+        assert "](https://" not in message

@@ -101,6 +101,39 @@ class TestOpenGoKrClient:
         error_msg = str(exc_info.value).lower()
         assert "network" in error_msg or "connection" in error_msg
 
+    @responses.activate
+    def test_fetch_documents_timeout_error(self, client: OpenGoKrClient) -> None:
+        """Raise OpenGoKrError with timeout context on request timeout."""
+        from requests.exceptions import Timeout
+
+        responses.add(
+            responses.POST,
+            self.PAGE_URL,
+            body=Timeout("Request timed out"),
+        )
+
+        with pytest.raises(OpenGoKrError) as exc_info:
+            client.fetch_documents("1342000", "교육부", "2025-12-27")
+
+        assert "Request timeout" in str(exc_info.value)
+
+    @responses.activate
+    def test_fetch_documents_request_exception_error(
+        self, client: OpenGoKrClient
+    ) -> None:
+        """Raise OpenGoKrError with request-failed context on HTTP error."""
+        responses.add(
+            responses.POST,
+            self.PAGE_URL,
+            body="Internal Server Error",
+            status=500,
+        )
+
+        with pytest.raises(OpenGoKrError) as exc_info:
+            client.fetch_documents("1342000", "교육부", "2025-12-27")
+
+        assert "Request failed" in str(exc_info.value)
+
     # TEST-api-client-004: Parse document fields correctly
     @responses.activate
     def test_parse_document_fields(self, client: OpenGoKrClient) -> None:
@@ -152,6 +185,28 @@ class TestOpenGoKrClient:
         assert "Could not find result data" in str(exc_info.value)
 
     @responses.activate
+    def test_fetch_documents_invalid_result_json_raises_error(
+        self, client: OpenGoKrClient
+    ) -> None:
+        """Raise error when embedded result JSON cannot be parsed."""
+        responses.add(
+            responses.POST,
+            self.PAGE_URL,
+            body=(
+                "<html><body><script>"
+                "var result = {'rtnList': [], 'rtnTotal': 1};"
+                "</script></body></html>"
+            ),
+            status=200,
+        )
+
+        with pytest.raises(OpenGoKrError) as exc_info:
+            client.fetch_documents("1342000", "교육부", "2025-12-27")
+
+        assert "Failed to parse result JSON" in str(exc_info.value)
+        assert isinstance(exc_info.value.__cause__, json.JSONDecodeError)
+
+    @responses.activate
     def test_fetch_documents_pagination(self, client: OpenGoKrClient) -> None:
         """Fetch all pages when documents exceed page size."""
         # First page
@@ -188,6 +243,29 @@ class TestOpenGoKrClient:
         documents = client.fetch_documents("1342000", "교육부", "2025-12-27")
 
         assert len(documents) == 15
+
+    @responses.activate
+    def test_fetch_documents_stops_on_short_page(self, client: OpenGoKrClient) -> None:
+        """Stop pagination when current page has fewer rows than PAGE_SIZE."""
+        short_page_docs = [
+            {
+                "INFO_SJ": f"문서 {i}",
+                "PRDCTN_DT": "20251227120000",
+                "PROC_INSTT_NM": "교육부",
+            }
+            for i in range(3)
+        ]
+        responses.add(
+            responses.POST,
+            self.PAGE_URL,
+            body=self._make_html_response(short_page_docs, 50),
+            status=200,
+        )
+
+        documents = client.fetch_documents("1342000", "교육부", "2025-12-27")
+
+        assert len(documents) == 3
+        assert len(responses.calls) == 1
 
     # TEST-api-client-005: Filter out personnel appointment documents
     @responses.activate
