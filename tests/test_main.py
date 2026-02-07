@@ -1,5 +1,6 @@
 """Tests for main entry point and orchestration."""
 
+import logging
 import runpy
 import sys
 from datetime import datetime
@@ -126,10 +127,14 @@ def test_main_returns_one_when_config_file_is_missing(
 ) -> None:
     """Return exit code 1 when no config file can be found."""
     monkeypatch.setattr(sys, "argv", ["open-go-kr"])
+
+    def _missing_config() -> Path:
+        raise FileNotFoundError("missing agencies.yaml")
+
     monkeypatch.setattr(
         main_module,
         "find_config_path",
-        lambda: (_ for _ in ()).throw(FileNotFoundError("missing agencies.yaml")),
+        _missing_config,
     )
 
     result = main_module.main()
@@ -361,8 +366,10 @@ def test_main_returns_zero_when_all_agencies_and_send_succeed(
 
 def test_main_formats_date_display_as_range_when_start_and_end_differ(
     monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Build date range display when start_date and end_date differ."""
+    caplog.set_level(logging.INFO)
     monkeypatch.setattr(
         sys,
         "argv",
@@ -376,15 +383,12 @@ def test_main_formats_date_display_as_range_when_start_and_end_differ(
             "2026-02-02",
         ],
     )
-    monkeypatch.setattr(
-        main_module,
-        "load_agencies",
-        lambda _path: (_ for _ in ()).throw(FileNotFoundError("missing agencies.yaml")),
-    )
+    monkeypatch.setattr(main_module, "load_agencies", lambda _path: [])
 
     result = main_module.main()
 
-    assert result == 1
+    assert result == 0
+    assert "Fetching documents for date range: 2026-02-01 ~ 2026-02-02" in caplog.text
 
 
 def test_main_module_entrypoint_exits_with_main_return_code(
