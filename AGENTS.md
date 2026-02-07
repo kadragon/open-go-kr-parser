@@ -30,3 +30,14 @@ This reliably drives network-error branches without patching internals or adding
 
 ### Impact
 Prefer this pattern for client/notifier network-failure tests to keep failure setup focused and deterministic.
+
+## 2026-02-07 - Covering `main` Module Entrypoint
+
+### Decision/Learning
+Use `runpy.run_module("main", run_name="__main__")` with `pytest.raises(SystemExit)` to cover the `if __name__ == "__main__":` branch.
+
+### Reason
+Spawning a subprocess does not contribute to in-process coverage metrics, so line coverage for module entrypoints can remain missing.
+
+### Impact
+When targeting script entrypoint coverage, execute the module in-process via `runpy` and assert on the propagated exit code.

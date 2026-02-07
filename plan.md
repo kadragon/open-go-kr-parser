@@ -41,18 +41,20 @@
 
 ### `src/main.py` (missing: 5-183)
 
-- [ ] Add test: `get_target_date_range` returns Friday-Sunday window when today is Monday
-- [ ] Add test: `get_target_date_range` returns yesterday-only window when today is Tuesday
-- [ ] Add test: `find_config_path` prefers script-relative `config/agencies.yaml` when present
-- [ ] Add test: `find_config_path` falls back to cwd `config/agencies.yaml` when script-relative is absent
-- [ ] Add test: `find_config_path` raises `FileNotFoundError` when no candidate exists
-- [ ] Add test: `main` returns `1` when `--start-date` is after `--end-date`
-- [ ] Add test: `main` returns `1` when config file is missing
-- [ ] Add test: `main` returns `0` when agency list is empty
-- [ ] Add test: `main` returns `1` when Telegram env vars are missing
-- [ ] Add test: `main` continues after one agency API failure and returns `1` if any agency failed
-- [ ] Add test: `main` returns `1` when notifier send fails with `TelegramError`
-- [ ] Add test: `main` returns `0` when all agencies process successfully and consolidated send succeeds
+- [x] Add test: `get_target_date_range` returns Friday-Sunday window when today is Monday
+- [x] Add test: `get_target_date_range` returns yesterday-only window when today is Tuesday
+- [x] Add test: `find_config_path` prefers script-relative `config/agencies.yaml` when present
+- [x] Add test: `find_config_path` falls back to cwd `config/agencies.yaml` when script-relative is absent
+- [x] Add test: `find_config_path` raises `FileNotFoundError` when no candidate exists
+- [x] Add test: `main` returns `1` when `--start-date` is after `--end-date`
+- [x] Add test: `main` returns `1` when config file is missing
+- [x] Add test: `main` returns `0` when agency list is empty
+- [x] Add test: `main` returns `1` when Telegram env vars are missing
+- [x] Add test: `main` continues after one agency API failure and returns `1` if any agency failed
+- [x] Add test: `main` returns `1` when notifier send fails with `TelegramError`
+- [x] Add test: `main` returns `0` when all agencies process successfully and consolidated send succeeds
+- [x] Add test: `main` formats date display as range when start/end differ
+- [x] Add test: module entrypoint (`__main__`) exits with `main()` return code
 
 ## Execution Rule
 
