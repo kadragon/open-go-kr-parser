@@ -391,6 +391,61 @@ def test_main_formats_date_display_as_range_when_start_and_end_differ(
     assert "Fetching documents for date range: 2026-02-01 ~ 2026-02-02" in caplog.text
 
 
+def test_main_skips_notification_when_all_agencies_return_zero_documents(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Skip Telegram notification when all agencies return empty document lists."""
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "open-go-kr",
+            "--config",
+            "/tmp/nonexistent-agencies.yaml",
+            "--start-date",
+            "2026-02-02",
+            "--end-date",
+            "2026-02-02",
+        ],
+    )
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "bot-token")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "chat-id")
+    monkeypatch.setattr(
+        main_module,
+        "load_agencies",
+        lambda _path: [
+            SimpleNamespace(code="A1", name="기관1"),
+            SimpleNamespace(code="A2", name="기관2"),
+        ],
+    )
+
+    class FakeClient:
+        def fetch_documents(
+            self, _code: str, _name: str, _start: str, _end: str
+        ) -> list[main_module.Document]:
+            return []
+
+    sent_payloads: list[tuple[str, list[tuple[str, list[main_module.Document]]]]] = []
+
+    class FakeNotifier:
+        def __init__(self, _bot_token: str, _chat_id: str) -> None:
+            pass
+
+        def send_multi_agency_documents(
+            self, date: str, results: list[tuple[str, list[main_module.Document]]]
+        ) -> bool:
+            sent_payloads.append((date, results))
+            return True
+
+    monkeypatch.setattr(main_module, "OpenGoKrClient", FakeClient)
+    monkeypatch.setattr(main_module, "TelegramNotifier", FakeNotifier)
+
+    result = main_module.main()
+
+    assert result == 0
+    assert len(sent_payloads) == 0
+
+
 def test_main_module_entrypoint_exits_with_main_return_code(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

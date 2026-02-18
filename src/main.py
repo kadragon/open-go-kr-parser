@@ -166,7 +166,8 @@ def main() -> int:
             continue
 
     # Send consolidated notification for all agencies
-    if all_results:
+    total_documents = sum(len(docs) for _, docs in all_results)
+    if all_results and total_documents > 0:
         try:
             notifier.send_multi_agency_documents(date_display, all_results)
             logger.info(
@@ -175,6 +176,8 @@ def main() -> int:
         except TelegramError as e:
             logger.error(f"Telegram error: {e}")
             has_errors = True
+    else:
+        logger.info("No documents found across all agencies, skipping notification")
 
     return 1 if has_errors else 0
 
