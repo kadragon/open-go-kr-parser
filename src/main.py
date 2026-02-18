@@ -167,7 +167,7 @@ def main() -> int:
 
     # Send consolidated notification for all agencies
     total_documents = sum(len(docs) for _, docs in all_results)
-    if all_results and total_documents > 0:
+    if total_documents > 0:
         try:
             notifier.send_multi_agency_documents(date_display, all_results)
             logger.info(
