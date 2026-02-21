@@ -41,3 +41,14 @@ Spawning a subprocess does not contribute to in-process coverage metrics, so lin
 
 ### Impact
 When targeting script entrypoint coverage, execute the module in-process via `runpy` and assert on the propagated exit code.
+
+## 2026-02-21 - Local Dev Commands
+
+### Decision/Learning
+Use `pytest` for tests, `ruff check src tests` for linting, and `mypy src` for type checks. Run the CLI with `open-go-kr` and pass dates via `--dates "YYYY-MM-DD,YYYY-MM-DD"`.
+
+### Reason
+These are the documented development and runtime commands in the README.
+
+### Impact
+Prefer these commands for local verification and date-scoped runs before pushing changes.
